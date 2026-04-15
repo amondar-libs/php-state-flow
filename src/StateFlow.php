@@ -165,10 +165,10 @@ class StateFlow
         $list = static::getShortnamesRegex($vocabulary);
 
         if ($defaultCity === null) {
-            return "(?:(?:[\w\s-]{1,$maxCityName})\,\s(?:$list))";
+            return "(?:(?:[\w\s-]{1,$maxCityName})\,\s?(?:$list))";
         }
 
-        return "((?:(?:[\w\s-]{1,$maxCityName})\,\s(?:$list))|($defaultCity))";
+        return "((?:(?:[\w\s-]{1,$maxCityName})\,\s?(?:$list))|($defaultCity))";
     }
 
     /**

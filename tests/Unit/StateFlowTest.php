@@ -65,6 +65,7 @@ test('getCityRegex returns a valid regex pattern for city and state', function (
     expect($regex)->toBeString()
         ->and('New York, NY')->toMatch('/^' . $regex . '$/')
         ->and('Los Angeles, CA')->toMatch('/^' . $regex . '$/')
+        ->and('Los Angeles,CA')->toMatch('/^' . $regex . '$/')
         ->and('Invalid City, XX')->not->toMatch('/^' . $regex . '$/');
 });
 
@@ -80,6 +81,6 @@ test('getOriginRegex returns a regex pattern for city/state or just state', func
 
     expect('New York, NY')->toMatch('/' . $regex . '/')
         ->and('NY')->toMatch('/^' . $regex . '$/')
-        ->and('California, CA')->toMatch('/' . $regex . '/')
+        ->and('California,CA')->toMatch('/' . $regex . '/')
         ->and('XX')->not->toMatch('/^' . $regex . '$/');
 });
