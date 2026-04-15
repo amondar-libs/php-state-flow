@@ -19,6 +19,10 @@ class StateFlow
 
     protected static ?string $shortnamesRegexCache = null;
 
+    protected static array $labelsCache = [];
+
+    protected static array $labelsRegexCache = [];
+
     protected static array $stateByLabelCache = [];
 
     protected static array $labelByStateCache = [];
@@ -33,12 +37,32 @@ class StateFlow
      */
     public static function getShortnames(string $vocabulary = State::class): array
     {
-        if (isset(static::$shortnamesCache[$vocabulary])) {
-            return static::$shortnamesCache[$vocabulary];
+        if (isset(static::$shortnamesCache[ $vocabulary ])) {
+            return static::$shortnamesCache[ $vocabulary ];
         }
 
-        return static::$shortnamesCache[$vocabulary] = array_map(
+        return static::$shortnamesCache[ $vocabulary ] = array_map(
             static fn($case) => $case->value,
+            $vocabulary::cases()
+        );
+    }
+
+    /**
+     * Retrieve a list of labels from the given enumeration class.
+     *
+     * @template T of BackedEnum
+     *
+     * @param  class-string<T>  $vocabulary  The enum class from which to extract the labels.
+     * @return array<int, string> An array where each value corresponds to the name of an enum case.
+     */
+    public static function getLabels(string $vocabulary = State::class): array
+    {
+        if (isset(static::$labelsCache[ $vocabulary ])) {
+            return static::$labelsCache[ $vocabulary ];
+        }
+
+        return static::$labelsCache[ $vocabulary ] = array_map(
+            static fn($case) => static::normalizeLabel($case->name),
             $vocabulary::cases()
         );
     }
@@ -61,22 +85,48 @@ class StateFlow
     }
 
     /**
+     * Generate a regex pattern matching all normalized labels from the specified vocabulary.
+     *
+     * @template T of BackedEnum
+     *
+     * @param  class-string<T>  $vocabulary  The enum class defining the labels.
+     * @return string A regex pattern string that matches any of the normalized labels.
+     */
+    public static function getLabelsRegex(string $vocabulary = State::class): string
+    {
+        if (isset(static::$labelsRegexCache[ $vocabulary ])) {
+            return static::$labelsRegexCache[ $vocabulary ];
+        }
+
+        $list = implode('|', static::getLabels($vocabulary));
+
+        return static::$labelsRegexCache[ $vocabulary ] = $list;
+    }
+
+    /**
      * Retrieve a mapping of normalized state labels to their corresponding values.
      *
      * @template T of BackedEnum
      *
      * @param  class-string<T>  $vocabulary  The enum class defining the states.
-     * @return array<string, string> An associative array where keys are normalized state labels, and values are the corresponding enum values.
+     * @return array<string, string> An associative array where keys are normalized state labels, and values are the
+     *                               corresponding enum values.
      */
     public static function getStateByLabelMap(string $vocabulary = State::class): array
     {
-        if (isset(static::$stateByLabelCache[$vocabulary])) {
-            return static::$stateByLabelCache[$vocabulary];
+        if (isset(static::$stateByLabelCache[ $vocabulary ])) {
+            return static::$stateByLabelCache[ $vocabulary ];
         }
 
-        return static::$stateByLabelCache[$vocabulary] = Arr::mapWithKeys(
+        return static::$stateByLabelCache[ $vocabulary ] = Arr::mapWithKeys(
             $vocabulary::cases(),
-            static fn(BackedEnum $case) => [Str::of($case->name)->lower()->squish()->snake()->toString() => $case->value]
+            static fn(BackedEnum $case) => [
+                Str::of($case->name)
+                    ->lower()
+                    ->squish()
+                    ->snake()
+                    ->toString() => $case->value,
+            ]
         );
     }
 
@@ -91,17 +141,26 @@ class StateFlow
      */
     public static function getLabelByStateMap(string $vocabulary = State::class): array
     {
-        if (isset(static::$labelByStateCache[$vocabulary])) {
-            return static::$labelByStateCache[$vocabulary];
+        if (isset(static::$labelByStateCache[ $vocabulary ])) {
+            return static::$labelByStateCache[ $vocabulary ];
         }
 
-        return static::$labelByStateCache[$vocabulary] = Arr::mapWithKeys(
+        return static::$labelByStateCache[ $vocabulary ] = Arr::mapWithKeys(
             $vocabulary::cases(),
-            static fn(BackedEnum $case) => [Str::lower($case->value) => Str::of($case->name)
+            static fn(BackedEnum $case) => [
+                Str::lower($case->value) => static::normalizeLabel($case->name),
+            ]
+        );
+    }
+
+    public static function normalizeLabel(?string $label): ?string
+    {
+        return $label ?
+            Str::of($label)
                 ->replace('_', ' ')
                 ->title()
-                ->toString()]
-        );
+                ->toString()
+            : null;
     }
 
     /**
@@ -118,7 +177,7 @@ class StateFlow
     {
         $normalized = Str::of($fullName)->lower()->squish()->snake()->toString();
 
-        $result = static::getStateByLabelMap($vocabulary)[$normalized] ?? null;
+        $result = static::getStateByLabelMap($vocabulary)[ $normalized ] ?? null;
 
         if ($result === null) {
             return null;
@@ -141,7 +200,7 @@ class StateFlow
     {
         $normalized = Str::lower($short);
 
-        $result = static::getLabelByStateMap($vocabulary)[$normalized] ?? null;
+        $result = static::getLabelByStateMap($vocabulary)[ $normalized ] ?? null;
 
         if ($result === null) {
             return null;
@@ -151,7 +210,8 @@ class StateFlow
     }
 
     /**
-     * Generate a regex pattern to match city names followed by a state abbreviation, with optional default city inclusion.
+     * Generate a regex pattern to match city names followed by a state abbreviation, with optional default city
+     * inclusion.
      *
      * @template T of BackedEnum
      *
@@ -162,13 +222,14 @@ class StateFlow
      */
     public static function getCityRegex(int $maxCityName = 30, ?string $defaultCity = null, string $vocabulary = State::class): string
     {
-        $list = static::getShortnamesRegex($vocabulary);
+        $shortList = static::getShortnamesRegex($vocabulary);
+        $labelList = static::getLabelsRegex($vocabulary);
 
         if ($defaultCity === null) {
-            return "(?:(?:[\w\s-]{1,$maxCityName})\,\s?(?:$list))";
+            return "(?:(?:[\w\s-]{1,$maxCityName})\,\s?(?:$shortList|$labelList))";
         }
 
-        return "((?:(?:[\w\s-]{1,$maxCityName})\,\s?(?:$list))|($defaultCity))";
+        return "((?:(?:[\w\s-]{1,$maxCityName})\,\s?(?:$shortList|$labelList))|($defaultCity))";
     }
 
     /**
@@ -180,13 +241,15 @@ class StateFlow
      *
      * @param  int  $maxCityName  The maximum length allowed for city names in the regex.
      * @param  string  $vocabulary  The enum class defining the valid states.
-     * @return string A regular expression string that matches origin patterns, including city and state combinations or single states.
+     * @return string A regular expression string that matches origin patterns, including city and state combinations
+     *                or single states.
      */
     public static function getOriginRegex(int $maxCityName = 30, string $vocabulary = State::class): string
     {
-        $list = static::getShortnamesRegex($vocabulary);
+        $shortList = static::getShortnamesRegex($vocabulary);
+        $labelList = static::getLabelsRegex($vocabulary);
         $cityRegex = static::getCityRegex($maxCityName, null, $vocabulary);
 
-        return "($cityRegex|($list))";
+        return "($cityRegex|$shortList|$labelList)";
     }
 }
