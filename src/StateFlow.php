@@ -300,9 +300,9 @@ class StateFlow
      * Normalizes a given name key by converting it to lowercase, replacing specific characters, and trimming excess spaces.
      *
      * @param  string  $name  The input name key to be normalized.
-     * @return string|null The normalized name key, or null if the input cannot be processed.
+     * @return string The normalized name key, or null if the input cannot be processed.
      */
-    public static function normalizeNameKey(string $name): ?string
+    public static function normalizeNameKey(string $name): string
     {
         // Squish multiple spaces into a single space, and remove any combining spaces.
         $result = preg_replace('~(\s|\x{3164}|\x{1160})+~u', ' ', mb_trim($name));
