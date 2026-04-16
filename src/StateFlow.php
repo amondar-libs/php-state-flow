@@ -5,8 +5,6 @@ declare(strict_types = 1);
 namespace Amondar\PhpStateFlow;
 
 use BackedEnum;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 /**
  * Class State
@@ -15,17 +13,17 @@ use Illuminate\Support\Str;
  */
 class StateFlow
 {
-    protected static array $shortnamesCache = [];
+    protected static array $abbreviationsCache = [];
 
-    protected static ?string $shortnamesRegexCache = null;
+    protected static ?string $abbreviationsRegexCache = null;
 
-    protected static array $labelsCache = [];
+    protected static array $namesCache = [];
 
-    protected static array $labelsRegexCache = [];
+    protected static array $namesRegexCache = [];
 
-    protected static array $stateByLabelCache = [];
+    protected static array $abbreviationByNameCache = [];
 
-    protected static array $labelByStateCache = [];
+    protected static array $nameByAbbreviationCache = [];
 
     /**
      * Get a list of state codes as an inline array.
@@ -35,132 +33,137 @@ class StateFlow
      * @param  class-string<T>  $vocabulary
      * @return array The array of state codes extracted from the cases.
      */
-    public static function getShortnames(string $vocabulary = State::class): array
+    public static function getAbbreviations(string $vocabulary = State::class): array
     {
-        if (isset(static::$shortnamesCache[ $vocabulary ])) {
-            return static::$shortnamesCache[ $vocabulary ];
+        if (isset(static::$abbreviationsCache[ $vocabulary ])) {
+            return static::$abbreviationsCache[ $vocabulary ];
         }
 
-        return static::$shortnamesCache[ $vocabulary ] = array_map(
+        return static::$abbreviationsCache[ $vocabulary ] = array_map(
+            static fn($case) => $case->name,
+            $vocabulary::cases()
+        );
+    }
+
+    /**
+     * Retrieves the count of abbreviations for the given vocabulary.
+     *
+     * @template T of BackedEnum
+     *
+     * @param  class-string<T>  $vocabulary
+     * @return int The total number of abbreviations found for the specified vocabulary.
+     */
+    public static function getCount(string $vocabulary = State::class): int
+    {
+        return count(static::getAbbreviations($vocabulary));
+    }
+
+    /**
+     * Retrieve a list of names from the given enumeration class.
+     *
+     * @template T of BackedEnum
+     *
+     * @param  class-string<T>  $vocabulary  The enum class from which to extract the names.
+     * @return array<int, string> An array where each value corresponds to the name of an enum case.
+     */
+    public static function getNames(string $vocabulary = State::class): array
+    {
+        if (isset(static::$namesCache[ $vocabulary ])) {
+            return static::$namesCache[ $vocabulary ];
+        }
+
+        return static::$namesCache[ $vocabulary ] = array_map(
             static fn($case) => $case->value,
             $vocabulary::cases()
         );
     }
 
     /**
-     * Retrieve a list of labels from the given enumeration class.
+     * Generate a regex pattern for matching abbreviations derived from the specified vocabulary.
+     *
+     * @param  string  $vocabulary  The class defining the abbreviations, typically an enum or similar structure.
+     * @return string A regex pattern representing the list of abbreviations joined by the '|' character.
+     */
+    public static function getAbbreviationsRegex(string $vocabulary = State::class): string
+    {
+        if (static::$abbreviationsRegexCache !== null) {
+            return static::$abbreviationsRegexCache;
+        }
+
+        $list = implode('|', static::getAbbreviations($vocabulary));
+
+        return static::$abbreviationsRegexCache = $list;
+    }
+
+    /**
+     * Generate a regex pattern matching all normalized names from the specified vocabulary.
      *
      * @template T of BackedEnum
      *
-     * @param  class-string<T>  $vocabulary  The enum class from which to extract the labels.
-     * @return array<int, string> An array where each value corresponds to the name of an enum case.
+     * @param  class-string<T>  $vocabulary  The enum class defining the names.
+     * @return string A regex pattern string that matches any of the normalized names.
      */
-    public static function getLabels(string $vocabulary = State::class): array
+    public static function getNamesRegex(string $vocabulary = State::class): string
     {
-        if (isset(static::$labelsCache[ $vocabulary ])) {
-            return static::$labelsCache[ $vocabulary ];
+        if (isset(static::$namesRegexCache[ $vocabulary ])) {
+            return static::$namesRegexCache[ $vocabulary ];
         }
 
-        return static::$labelsCache[ $vocabulary ] = array_map(
-            static fn($case) => static::normalizeLabel($case->name),
-            $vocabulary::cases()
-        );
+        $list = implode('|', static::getNames($vocabulary));
+
+        return static::$namesRegexCache[ $vocabulary ] = $list;
     }
 
     /**
-     * Generate a regex pattern for matching shortnames derived from the specified vocabulary.
-     *
-     * @param  string  $vocabulary  The class defining the shortnames, typically an enum or similar structure.
-     * @return string A regex pattern representing the list of shortnames joined by the '|' character.
-     */
-    public static function getShortnamesRegex(string $vocabulary = State::class): string
-    {
-        if (static::$shortnamesRegexCache !== null) {
-            return static::$shortnamesRegexCache;
-        }
-
-        $list = implode('|', static::getShortnames($vocabulary));
-
-        return static::$shortnamesRegexCache = $list;
-    }
-
-    /**
-     * Generate a regex pattern matching all normalized labels from the specified vocabulary.
-     *
-     * @template T of BackedEnum
-     *
-     * @param  class-string<T>  $vocabulary  The enum class defining the labels.
-     * @return string A regex pattern string that matches any of the normalized labels.
-     */
-    public static function getLabelsRegex(string $vocabulary = State::class): string
-    {
-        if (isset(static::$labelsRegexCache[ $vocabulary ])) {
-            return static::$labelsRegexCache[ $vocabulary ];
-        }
-
-        $list = implode('|', static::getLabels($vocabulary));
-
-        return static::$labelsRegexCache[ $vocabulary ] = $list;
-    }
-
-    /**
-     * Retrieve a mapping of normalized state labels to their corresponding values.
+     * Retrieve a mapping of normalized state names to their corresponding values.
      *
      * @template T of BackedEnum
      *
      * @param  class-string<T>  $vocabulary  The enum class defining the states.
-     * @return array<string, string> An associative array where keys are normalized state labels, and values are the
+     * @return array<string, string> An associative array where keys are normalized state names, and values are the
      *                               corresponding enum values.
      */
-    public static function getStateByLabelMap(string $vocabulary = State::class): array
+    public static function getAbbreviationByNameMap(string $vocabulary = State::class): array
     {
-        if (isset(static::$stateByLabelCache[ $vocabulary ])) {
-            return static::$stateByLabelCache[ $vocabulary ];
+        if (isset(static::$abbreviationByNameCache[ $vocabulary ])) {
+            return static::$abbreviationByNameCache[ $vocabulary ];
         }
 
-        return static::$stateByLabelCache[ $vocabulary ] = Arr::mapWithKeys(
-            $vocabulary::cases(),
-            static fn(BackedEnum $case) => [
-                Str::of($case->name)
-                    ->lower()
-                    ->squish()
-                    ->snake()
-                    ->toString() => $case->value,
-            ]
-        );
+        $keys = [];
+        $values = [];
+
+        foreach ($vocabulary::cases() as $case) {
+            $keys[] = static::normalizeNameKey($case->value);
+            $values[] = $case->name;
+        }
+
+        return static::$abbreviationByNameCache[ $vocabulary ] = array_combine($keys, $values);
     }
 
     /**
-     * Retrieve a mapping of state values to their corresponding human-readable labels.
+     * Retrieve a mapping of state values to their corresponding human-readable names.
      *
      * @template T of BackedEnum
      *
      * @param  class-string<T>  $vocabulary  The enum class defining the states.
      * @return array<string, string> An associative array where keys are lowercased state values
-     *                               and values are the corresponding human-readable labels.
+     *                               and values are the corresponding human-readable names.
      */
-    public static function getLabelByStateMap(string $vocabulary = State::class): array
+    public static function getNameByAbbreviationMap(string $vocabulary = State::class): array
     {
-        if (isset(static::$labelByStateCache[ $vocabulary ])) {
-            return static::$labelByStateCache[ $vocabulary ];
+        if (isset(static::$nameByAbbreviationCache[ $vocabulary ])) {
+            return static::$nameByAbbreviationCache[ $vocabulary ];
         }
 
-        return static::$labelByStateCache[ $vocabulary ] = Arr::mapWithKeys(
-            $vocabulary::cases(),
-            static fn(BackedEnum $case) => [
-                Str::lower($case->value) => static::normalizeLabel($case->name),
-            ]
-        );
-    }
+        $keys = [];
+        $values = [];
 
-    public static function normalizeLabel(?string $label): ?string
-    {
-        return $label ?
-            Str::of($label)
-                ->replace('_', ' ')
-                ->title()
-                ->toString()
-            : null;
+        foreach ($vocabulary::cases() as $case) {
+            $keys[] = mb_strtolower($case->name);
+            $values[] = $case->value;
+        }
+
+        return static::$nameByAbbreviationCache[ $vocabulary ] = array_combine($keys, $values);
     }
 
     /**
@@ -168,22 +171,22 @@ class StateFlow
      *
      * @template T of BackedEnum
      *
-     * @param  string  $fullName  Full state name (e.g., "New York").
+     * @param  string  $name  Full state name (e.g., "New York").
      * @param  bool  $lower  If true, returns the result in lowercase.
      * @param  class-string<T>  $vocabulary
      * @return string|null The two-letter code (e.g., "NY") or null if not found.
      */
-    public static function getLabel(string $fullName, bool $lower = false, string $vocabulary = State::class): ?string
+    public static function getAbbreviation(string $name, bool $lower = false, string $vocabulary = State::class): ?string
     {
-        $normalized = Str::of($fullName)->lower()->squish()->snake()->toString();
+        $normalized = static::normalizeNameKey($name);
 
-        $result = static::getStateByLabelMap($vocabulary)[ $normalized ] ?? null;
+        $result = static::getAbbreviationByNameMap($vocabulary)[ $normalized ] ?? null;
 
         if ($result === null) {
             return null;
         }
 
-        return $lower ? Str::lower($result) : $result;
+        return $lower ? mb_strtolower($result) : $result;
     }
 
     /**
@@ -191,22 +194,22 @@ class StateFlow
      *
      * @template T of BackedEnum
      *
-     * @param  string  $short  The short identifier for which the corresponding name needs to be retrieved.
+     * @param  string  $abbreviation  The short identifier for which the corresponding name needs to be retrieved.
      * @param  bool  $lower  Determines whether the returned name should be in lowercase.
      * @param  class-string<T>  $vocabulary  The enum class defining the states to look up.
      * @return string|null The corresponding name if found, or null if no match exists.
      */
-    public static function getName(string $short, bool $lower = false, string $vocabulary = State::class): ?string
+    public static function getName(string $abbreviation, bool $lower = false, string $vocabulary = State::class): ?string
     {
-        $normalized = Str::lower($short);
+        $normalized = mb_strtolower($abbreviation);
 
-        $result = static::getLabelByStateMap($vocabulary)[ $normalized ] ?? null;
+        $result = static::getNameByAbbreviationMap($vocabulary)[ $normalized ] ?? null;
 
         if ($result === null) {
             return null;
         }
 
-        return $lower ? Str::lower($result) : $result;
+        return $lower ? mb_strtolower($result) : $result;
     }
 
     /**
@@ -222,14 +225,14 @@ class StateFlow
      */
     public static function getCityRegex(int $maxCityName = 30, ?string $defaultCity = null, string $vocabulary = State::class): string
     {
-        $shortList = static::getShortnamesRegex($vocabulary);
-        $labelList = static::getLabelsRegex($vocabulary);
+        $abbreviationsList = static::getAbbreviationsRegex($vocabulary);
+        $namesList = static::getNamesRegex($vocabulary);
 
         if ($defaultCity === null) {
-            return "(?:(?:[\w\s-]{1,$maxCityName})\,\s?(?:$shortList|$labelList))";
+            return "(?:(?:[\w\s-]{1,$maxCityName})\,\s?(?:$abbreviationsList|$namesList))";
         }
 
-        return "((?:(?:[\w\s-]{1,$maxCityName})\,\s?(?:$shortList|$labelList))|($defaultCity))";
+        return "((?:(?:[\w\s-]{1,$maxCityName})\,\s?(?:$abbreviationsList|$namesList))|($defaultCity))";
     }
 
     /**
@@ -246,10 +249,24 @@ class StateFlow
      */
     public static function getOriginRegex(int $maxCityName = 30, string $vocabulary = State::class): string
     {
-        $shortList = static::getShortnamesRegex($vocabulary);
-        $labelList = static::getLabelsRegex($vocabulary);
+        $abbreviationsList = static::getAbbreviationsRegex($vocabulary);
+        $namesList = static::getNamesRegex($vocabulary);
         $cityRegex = static::getCityRegex($maxCityName, null, $vocabulary);
 
-        return "($cityRegex|$shortList|$labelList)";
+        return "($cityRegex|$abbreviationsList|$namesList)";
+    }
+
+    /**
+     * Normalizes a given name key by converting it to lowercase, replacing specific characters, and trimming excess spaces.
+     *
+     * @param  string  $name  The input name key to be normalized.
+     * @return string|null The normalized name key, or null if the input cannot be processed.
+     */
+    protected static function normalizeNameKey(string $name): ?string
+    {
+        // Squish multiple spaces into a single space, and remove any combining spaces.
+        $result = preg_replace('~(\s|\x{3164}|\x{1160})+~u', ' ', mb_trim($name));
+
+        return mb_strtolower(str_replace([' ', '-'], '_', $result));
     }
 }

@@ -4,38 +4,38 @@ declare(strict_types = 1);
 
 use Amondar\PhpStateFlow\StateFlow;
 
-test('getShortnames returns all state codes', function () {
-    $shortnames = StateFlow::getShortnames();
+test('getAbbreviations returns all state codes', function () {
+    $shortnames = StateFlow::getAbbreviations();
 
     expect($shortnames)->toBeArray()
         ->and($shortnames)->toContain('AL', 'NY', 'WY')
         ->and(count($shortnames))->toBe(48);
 });
 
-test('getShortnamesRegex returns a regex string of state codes', function () {
-    $regex = StateFlow::getShortnamesRegex();
+test('getAbbreviationsRegex returns a regex string of state codes', function () {
+    $regex = StateFlow::getAbbreviationsRegex();
 
     expect($regex)->toBeString()
         ->and($regex)->toContain('AL|AZ|AR');
 });
 
-test('getLabels returns all state codes', function () {
-    $shortnames = StateFlow::getLabels();
+test('getNames returns all state codes', function () {
+    $shortnames = StateFlow::getNames();
 
     expect($shortnames)->toBeArray()
         ->and($shortnames)->toContain('Alabama', 'New York')
         ->and(count($shortnames))->toBe(48);
 });
 
-test('getLabelsRegex returns a regex string of state codes', function () {
-    $regex = StateFlow::getLabelsRegex();
+test('getNamesRegex returns a regex string of state codes', function () {
+    $regex = StateFlow::getNamesRegex();
 
     expect($regex)->toBeString()
         ->and($regex)->toContain('|New York|', 'Alabama|');
 });
 
-test('getStateByLabelMap returns a mapping of labels to values', function () {
-    $map = StateFlow::getStateByLabelMap();
+test('getAbbreviationByNameMap returns a mapping of labels to values', function () {
+    $map = StateFlow::getAbbreviationByNameMap();
 
     expect($map)->toBeArray()
         ->and($map)->toHaveKey('new_york', 'NY')
@@ -43,8 +43,8 @@ test('getStateByLabelMap returns a mapping of labels to values', function () {
         ->and($map)->toHaveKey('west_virginia', 'WV');
 });
 
-test('getLabelByStateMap returns a mapping of values to headlines', function () {
-    $map = StateFlow::getLabelByStateMap();
+test('getNameByAbbreviationMap returns a mapping of values to headlines', function () {
+    $map = StateFlow::getNameByAbbreviationMap();
 
     expect($map)->toBeArray()
         ->and($map)->toHaveKey('ny', 'New York')
@@ -52,16 +52,16 @@ test('getLabelByStateMap returns a mapping of values to headlines', function () 
         ->and($map)->toHaveKey('wv', 'West Virginia');
 });
 
-test('getLabel returns the short code by full name', function () {
-    expect(StateFlow::getLabel('New York'))->toBe('NY')
-        ->and(StateFlow::getLabel('new york'))->toBe('NY')
-        ->and(StateFlow::getLabel('  New   York  '))->toBe('NY')
-        ->and(StateFlow::getLabel('NY'))->toBeNull()
-        ->and(StateFlow::getLabel('Non Existent'))->toBeNull();
+test('getAbbreviation returns the short code by full name', function () {
+    expect(StateFlow::getAbbreviation('New York'))->toBe('NY')
+        ->and(StateFlow::getAbbreviation('new york'))->toBe('NY')
+        ->and(StateFlow::getAbbreviation('  New   York  '))->toBe('NY')
+        ->and(StateFlow::getAbbreviation('NY'))->toBeNull()
+        ->and(StateFlow::getAbbreviation('Non Existent'))->toBeNull();
 });
 
-test('getLabel can return lowercase result', function () {
-    expect(StateFlow::getLabel('New York', true))->toBe('ny');
+test('getAbbreviation can return lowercase result', function () {
+    expect(StateFlow::getAbbreviation('New York', true))->toBe('ny');
 });
 
 test('getName returns the full name by short code', function () {

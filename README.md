@@ -25,7 +25,7 @@ composer require amondar-libs/php-state-flow
 
 use Amondar\PhpStateFlow\StateFlow;
 
-StateFlow::getLabel('New York');   // "NY"
+StateFlow::getAbbreviation('New York');   // "NY"
 StateFlow::getName('ny');          // "New York"
 
 // Regex fragments
@@ -46,39 +46,47 @@ This allows reuse of the same helpers with your own enum dataset.
 
 ## API Reference
 
-### `getShortnames(string $vocabulary = State::class): array`
+### `getAbbreviations(string $vocabulary = State::class): array`
 
-Returns all enum backed values (state codes by default), e.g. `['AL', 'AZ', ..., 'WY']`.
-
-```php
-$codes = StateFlow::getShortnames();
-```
-
-### `getLabels(string $vocabulary = State::class): array`
-
-Returns normalized enum case names in title case, e.g. `['Alabama', 'New York', ...]`.
+Returns all enum case names (state abbreviations by default), e.g. `['AL', 'AZ', ..., 'WY']`.
 
 ```php
-$labels = StateFlow::getLabels();
+$codes = StateFlow::getAbbreviations();
 ```
 
-### `getShortnamesRegex(string $vocabulary = State::class): string`
+### `getCount(string $vocabulary = State::class): int`
+
+Returns total number of items in the vocabulary.
+
+```php
+$count = StateFlow::getCount(); // 48
+```
+
+### `getNames(string $vocabulary = State::class): array`
+
+Returns all enum backed values (state names by default), e.g. `['Alabama', 'New York', ...]`.
+
+```php
+$names = StateFlow::getNames();
+```
+
+### `getAbbreviationsRegex(string $vocabulary = State::class): string`
 
 Returns a pipe-separated regex fragment of codes, e.g. `AL|AZ|AR|...`.
 
 ```php
-$codeRegex = StateFlow::getShortnamesRegex();
+$codeRegex = StateFlow::getAbbreviationsRegex();
 ```
 
-### `getLabelsRegex(string $vocabulary = State::class): string`
+### `getNamesRegex(string $vocabulary = State::class): string`
 
-Returns a pipe-separated regex fragment of normalized labels, e.g. `Alabama|Arizona|...`.
+Returns a pipe-separated regex fragment of names, e.g. `Alabama|Arizona|...`.
 
 ```php
-$labelRegex = StateFlow::getLabelsRegex();
+$labelRegex = StateFlow::getNamesRegex();
 ```
 
-### `getStateByLabelMap(string $vocabulary = State::class): array`
+### `getAbbreviationByNameMap(string $vocabulary = State::class): array`
 
 Returns a map of normalized snake-case labels to enum values.
 
@@ -87,10 +95,10 @@ Examples:
 - `west_virginia => WV`
 
 ```php
-$map = StateFlow::getStateByLabelMap();
+$map = StateFlow::getAbbreviationByNameMap();
 ```
 
-### `getLabelByStateMap(string $vocabulary = State::class): array`
+### `getNameByAbbreviationMap(string $vocabulary = State::class): array`
 
 Returns a map of lowercase enum values to human-readable labels.
 
@@ -99,23 +107,23 @@ Examples:
 - `al => Alabama`
 
 ```php
-$map = StateFlow::getLabelByStateMap();
+$map = StateFlow::getNameByAbbreviationMap();
 ```
 
-### `getLabel(string $fullName, bool $lower = false, string $vocabulary = State::class): ?string`
+### `getAbbreviation(string $name, bool $lower = false, string $vocabulary = State::class): ?string`
 
-Converts a full label to its short code.
+Converts a full state name to its short code.
 
 Behavior:
 - Input is normalized (`lower` + `squish` + `snake`)
-- Returns `null` if label is unknown
+- Returns `null` if state name is unknown
 - Optional lowercase output
 
 ```php
-StateFlow::getLabel('New York');         // "NY"
-StateFlow::getLabel('  New   York  ');   // "NY"
-StateFlow::getLabel('New York', true);   // "ny"
-StateFlow::getLabel('NY');               // null
+StateFlow::getAbbreviation('New York');         // "NY"
+StateFlow::getAbbreviation('  New   York  ');   // "NY"
+StateFlow::getAbbreviation('New York', true);   // "ny"
+StateFlow::getAbbreviation('NY');               // null
 ```
 
 ### `getName(string $short, bool $lower = false, string $vocabulary = State::class): ?string`
@@ -184,9 +192,9 @@ enum Region: string
 
 use Amondar\PhpStateFlow\StateFlow;
 
-$codes = StateFlow::getShortnames(Region::class);   // ['N', 'S']
-$labels = StateFlow::getLabels(Region::class);      // ['North', 'South']
-$name = StateFlow::getName('n', false, Region::class); // 'North'
+$codes = StateFlow::getAbbreviations(Region::class); // ['NORTH', 'SOUTH']
+$names = StateFlow::getNames(Region::class);         // ['N', 'S']
+$name = StateFlow::getName('north', false, Region::class); // 'N'
 ```
 
 ## Caching Notes
