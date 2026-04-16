@@ -302,7 +302,7 @@ class StateFlow
      * @param  string  $name  The input name key to be normalized.
      * @return string|null The normalized name key, or null if the input cannot be processed.
      */
-    protected static function normalizeNameKey(string $name): ?string
+    public static function normalizeNameKey(string $name): ?string
     {
         // Squish multiple spaces into a single space, and remove any combining spaces.
         $result = preg_replace('~(\s|\x{3164}|\x{1160})+~u', ' ', mb_trim($name));
