@@ -194,14 +194,16 @@ Searches states by abbreviation fragment and returns matched pairs as:
 Behavior:
 - Query is normalized (`trim` + lowercase)
 - Empty/whitespace-only query returns an empty array
-- Matches if query is contained in abbreviation key or equals full abbreviation
+- Matches if query is contained in name or equals full abbreviation
 
 ```php
+// Search all with "n" in name.
 StateFlow::search('n');
 // [
 //   'nc' => 'North Carolina',
 //   'ny' => 'New York',
 //   'tn' => 'Tennessee',
+//   ...
 // ]
 
 StateFlow::search('  NY  ');
