@@ -10,7 +10,6 @@ It provides:
 ## Requirements
 
 - PHP `^8.3`
-- `illuminate/support` `10.*|11.*|12.*|13.*`
 
 ## Installation
 
@@ -34,6 +33,13 @@ preg_match('/^' . $cityRegex . '$/', 'Los Angeles, CA'); // 1
 ```
 
 ## Core Concepts
+
+### There can be only one
+
+This package developed with only one thing in mind:   
+- any array in response based on: `values` for frontend and `keys` for search in any cases.
+
+That's why keys are lower cased and values are normalized.
 
 ### Default Vocabulary
 
