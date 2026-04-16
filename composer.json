@@ -1,6 +1,6 @@
 {
     "name": "amondar-libs/php-state-flow",
-    "description": "A simple library to help with USA state flows in PHP with in-memory cache support inside a single process",
+    "description": "A lightweight PHP package for working with U.S. state codes and names.",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -10,10 +10,19 @@
         }
     ],
     "keywords": [
-        "laravel",
         "php",
         "states",
-        "USA states"
+        "USA states",
+        "US states",
+        "US state codes",
+        "US state names",
+        "US state abbreviations",
+        "US state flow",
+        "US state lookup",
+        "US state validation",
+        "US state parser",
+        "US state regex",
+        "US state flow"
     ],
     "require": {
         "php": "^8.3"
