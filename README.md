@@ -227,6 +227,20 @@ $random = StateFlow::getRandom();
 // ]
 ```
 
+### `normalizeNameKey(string $name): string`
+
+Normalizes a given name key by converting it to lowercase, replacing spaces and hyphens with underscores, and trimming excess spaces.
+
+Behavior:
+- Input is trimmed and squished (multiple spaces reduced to one)
+- Hyphens and spaces are replaced with underscores
+- Output is lowercased
+
+```php
+StateFlow::normalizeNameKey('New York');         // "new_york"
+StateFlow::normalizeNameKey('  West   Virginia-State  '); // "west_virginia_state"
+```
+
 ## Using a Custom Enum Vocabulary
 
 ```php
