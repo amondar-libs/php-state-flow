@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 use Amondar\PhpStateFlow\StateFlow;
 
-test('getAbbreviations returns all state codes', function () {
+it('getAbbreviations returns all state codes', function () {
     $shortnames = StateFlow::getAbbreviations();
 
     expect($shortnames)->toBeArray()
@@ -12,14 +12,14 @@ test('getAbbreviations returns all state codes', function () {
         ->and(count($shortnames))->toBe(48);
 });
 
-test('getAbbreviationsRegex returns a regex string of state codes', function () {
+it('getAbbreviationsRegex returns a regex string of state codes', function () {
     $regex = StateFlow::getAbbreviationsRegex();
 
     expect($regex)->toBeString()
         ->and($regex)->toContain('AL|AZ|AR');
 });
 
-test('getNames returns all state codes', function () {
+it('getNames returns all state codes', function () {
     $shortnames = StateFlow::getNames();
 
     expect($shortnames)->toBeArray()
@@ -27,14 +27,14 @@ test('getNames returns all state codes', function () {
         ->and(count($shortnames))->toBe(48);
 });
 
-test('getNamesRegex returns a regex string of state codes', function () {
+it('getNamesRegex returns a regex string of state codes', function () {
     $regex = StateFlow::getNamesRegex();
 
     expect($regex)->toBeString()
         ->and($regex)->toContain('|New York|', 'Alabama|');
 });
 
-test('getAbbreviationByNameMap returns a mapping of labels to values', function () {
+it('getAbbreviationByNameMap returns a mapping of labels to values', function () {
     $map = StateFlow::getAbbreviationByNameMap();
 
     expect($map)->toBeArray()
@@ -43,7 +43,7 @@ test('getAbbreviationByNameMap returns a mapping of labels to values', function 
         ->and($map)->toHaveKey('west_virginia', 'WV');
 });
 
-test('getNameByAbbreviationMap returns a mapping of values to headlines', function () {
+it('getNameByAbbreviationMap returns a mapping of values to headlines', function () {
     $map = StateFlow::getNameByAbbreviationMap();
 
     expect($map)->toBeArray()
@@ -52,7 +52,7 @@ test('getNameByAbbreviationMap returns a mapping of values to headlines', functi
         ->and($map)->toHaveKey('wv', 'West Virginia');
 });
 
-test('getAbbreviation returns the short code by full name', function () {
+it('getAbbreviation returns the short code by full name', function () {
     expect(StateFlow::getAbbreviation('New York'))->toBe('NY')
         ->and(StateFlow::getAbbreviation('new york'))->toBe('NY')
         ->and(StateFlow::getAbbreviation('  New   York  '))->toBe('NY')
@@ -60,22 +60,22 @@ test('getAbbreviation returns the short code by full name', function () {
         ->and(StateFlow::getAbbreviation('Non Existent'))->toBeNull();
 });
 
-test('getAbbreviation can return lowercase result', function () {
+it('getAbbreviation can return lowercase result', function () {
     expect(StateFlow::getAbbreviation('New York', true))->toBe('ny');
 });
 
-test('getName returns the full name by short code', function () {
+it('getName returns the full name by short code', function () {
     expect(StateFlow::getName('NY'))->toBe('New York')
         ->and(StateFlow::getName('ny'))->toBe('New York')
         ->and(StateFlow::getName('AL'))->toBe('Alabama')
         ->and(StateFlow::getName('Unknown'))->toBeNull();
 });
 
-test('getName can return lowercase result', function () {
+it('getName can return lowercase result', function () {
     expect(StateFlow::getName('NY', true))->toBe('new york');
 });
 
-test('getCityRegex returns a valid regex pattern for city and state', function () {
+it('getCityRegex returns a valid regex pattern for city and state', function () {
     $regex = StateFlow::getCityRegex();
 
     expect($regex)->toBeString()
@@ -86,14 +86,14 @@ test('getCityRegex returns a valid regex pattern for city and state', function (
         ->and('Invalid City, XX')->not->toMatch('/^' . $regex . '$/');
 });
 
-test('getCityRegex can include a default city', function () {
+it('getCityRegex can include a default city', function () {
     $regex = StateFlow::getCityRegex(30, 'Anywhere');
 
     expect('Anywhere')->toMatch('/^' . $regex . '$/')
         ->and('New York, NY')->toMatch('/^' . $regex . '$/');
 });
 
-test('getOriginRegex returns a regex pattern for city/state or just state', function () {
+it('getOriginRegex returns a regex pattern for city/state or just state', function () {
     $regex = StateFlow::getOriginRegex();
 
     expect('New York, NY')->toMatch('/' . $regex . '/')
@@ -101,4 +101,32 @@ test('getOriginRegex returns a regex pattern for city/state or just state', func
         ->and('NY')->toMatch('/^' . $regex . '$/')
         ->and('California,CA')->toMatch('/' . $regex . '/')
         ->and('XX')->not->toMatch('/^' . $regex . '$/');
+});
+
+it('search returns matching states by abbreviation fragment', function () {
+    $result = StateFlow::search('n');
+
+    expect($result)->toBeArray()
+        ->and($result)->toHaveKey('ny', 'New York')
+        ->and($result)->toHaveKey('nc', 'North Carolina')
+        ->and($result)->toHaveKey('tn', 'Tennessee')
+        ->and($result)->not->toHaveKey('al');
+});
+
+it('search normalizes query and returns empty array for empty input', function () {
+    expect(StateFlow::search('  NY  '))->toBe([
+        'ny' => 'New York',
+    ])
+        ->and(StateFlow::search('   '))->toBe([]);
+});
+
+it('getRandom returns abbreviation and name pair from vocabulary map', function () {
+    $random = StateFlow::getRandom();
+    $map = StateFlow::getNameByAbbreviationMap();
+
+    expect($random)->toBeArray()
+        ->and($random)->toHaveKeys(['abbreviation', 'name'])
+        ->and($random['abbreviation'])->toBeString()
+        ->and($random['name'])->toBeString()
+        ->and($map)->toHaveKey(mb_strtolower($random['abbreviation']), $random['name']);
 });

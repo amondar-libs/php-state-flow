@@ -179,6 +179,46 @@ preg_match('/^' . $regex . '$/', 'New York, NY');  // 1
 preg_match('/^' . $regex . '$/', 'XX');            // 0
 ```
 
+### `search(string $query, string $vocabulary = State::class): array`
+
+Searches states by abbreviation fragment and returns matched pairs as:
+- key: lowercase abbreviation
+- value: full state name
+
+Behavior:
+- Query is normalized (`trim` + lowercase)
+- Empty/whitespace-only query returns an empty array
+- Matches if query is contained in abbreviation key or equals full abbreviation
+
+```php
+StateFlow::search('n');
+// [
+//   'nc' => 'North Carolina',
+//   'ny' => 'New York',
+//   'tn' => 'Tennessee',
+// ]
+
+StateFlow::search('  NY  ');
+// ['ny' => 'New York']
+
+StateFlow::search('   ');
+// []
+```
+
+### `getRandom(string $vocabulary = State::class): array{abbreviation: string, name: string}`
+
+Returns one random item from vocabulary as an associative pair:
+- `abbreviation`: uppercase abbreviation key
+- `name`: full state name
+
+```php
+$random = StateFlow::getRandom();
+// [
+//   'abbreviation' => 'NY',
+//   'name' => 'New York',
+// ]
+```
+
 ## Using a Custom Enum Vocabulary
 
 ```php

@@ -257,6 +257,46 @@ class StateFlow
     }
 
     /**
+     * Performs a search within a specified vocabulary based on a given query string.
+     *
+     * @template T of BackedEnum
+     *
+     * @param  string  $query  The string to search for, which will be normalized to lowercase and trimmed.
+     * @param  class-string<T>  $vocabulary  The enum class defining the states to look up.
+     * @return array An array of matching results where the query is found in the vocabulary.
+     */
+    public static function search(string $query, string $vocabulary = State::class): array
+    {
+        $query = mb_strtolower(mb_trim($query));
+
+        if ($query === '') {
+            return [];
+        }
+
+        return array_filter(
+            static::getNameByAbbreviationMap($vocabulary),
+            static fn(string $name, string $key) => str_contains(mb_strtolower($name), $query) || $key === $query,
+            ARRAY_FILTER_USE_BOTH
+        );
+    }
+
+    /**
+     * Retrieves a random item from specified vocabulary of states.
+     *
+     * @template T of BackedEnum
+     *
+     * @param  class-string<T>  $vocabulary  The enum class containing the vocabulary to select from.
+     * @return array{abbreviation: string, name: string} An associative array with 'abbreviation' as the key for the random abbreviation and 'name' as the key for its corresponding name.
+     */
+    public static function getRandom(string $vocabulary = State::class): array
+    {
+        $list = static::getNameByAbbreviationMap($vocabulary);
+        $abbreviation = array_rand(static::getNameByAbbreviationMap($vocabulary));
+
+        return ['abbreviation' => mb_strtoupper($abbreviation), 'name' => $list[$abbreviation]];
+    }
+
+    /**
      * Normalizes a given name key by converting it to lowercase, replacing specific characters, and trimming excess spaces.
      *
      * @param  string  $name  The input name key to be normalized.
