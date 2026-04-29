@@ -121,6 +121,38 @@ enum State: string
         ];
     }
 
+    public static function easternStates(): array
+    {
+        return [
+            self::ME->name => self::ME->value,
+            self::NH->name => self::NH->value,
+            self::VT->name => self::VT->value,
+            self::MA->name => self::MA->value,
+            self::RI->name => self::RI->value,
+            self::CT->name => self::CT->value,
+            self::NY->name => self::NY->value,
+            self::PA->name => self::PA->value,
+            self::NJ->name => self::NJ->value,
+            self::DE->name => self::DE->value,
+            self::MD->name => self::MD->value,
+            self::VA->name => self::VA->value,
+            self::WV->name => self::WV->value,
+            self::NC->name => self::NC->value,
+            self::SC->name => self::SC->value,
+            self::GA->name => self::GA->value,
+            self::FL->name => self::FL->value,
+            self::OH->name => self::OH->value,
+            self::MI->name => self::MI->value,
+            self::IN->name => self::IN->value,
+            self::IL->name => self::IL->value,
+            self::WI->name => self::WI->value,
+            self::KY->name => self::KY->value,
+            self::TN->name => self::TN->value,
+            self::AL->name => self::AL->value,
+            self::MS->name => self::MS->value,
+        ];
+    }
+
     public static function westernStateAbbreviations(): array
     {
         return [
@@ -168,6 +200,31 @@ enum State: string
             self::NE->value,
             self::SD->value,
             self::ND->value,
+        ];
+    }
+
+    public static function westernStates(): array
+    {
+        return [
+            self::AK->name => self::AK->value,
+            self::HI->name => self::HI->value,
+            self::CA->name => self::CA->value,
+            self::OR->name => self::OR->value,
+            self::WA->name => self::WA->value,
+            self::ID->name => self::ID->value,
+            self::MT->name => self::MT->value,
+            self::WY->name => self::WY->value,
+            self::NV->name => self::NV->value,
+            self::UT->name => self::UT->value,
+            self::CO->name => self::CO->value,
+            self::AZ->name => self::AZ->value,
+            self::NM->name => self::NM->value,
+            self::TX->name => self::TX->value,
+            self::OK->name => self::OK->value,
+            self::KS->name => self::KS->value,
+            self::NE->name => self::NE->value,
+            self::SD->name => self::SD->value,
+            self::ND->name => self::ND->value,
         ];
     }
 }
