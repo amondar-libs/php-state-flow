@@ -14,6 +14,7 @@ enum State: string
     case CO = 'Colorado';
     case CT = 'Connecticut';
     case DE = 'Delaware';
+    case DC = 'District of Columbia';
     case FL = 'Florida';
     case HI = 'Hawaii';
     case GA = 'Georgia';
@@ -63,6 +64,7 @@ enum State: string
             self::AL->name,
             self::CT->name,
             self::DE->name,
+            self::DC->name,
             self::FL->name,
             self::GA->name,
             self::IL->name,
@@ -95,6 +97,7 @@ enum State: string
             self::AL->value,
             self::CT->value,
             self::DE->value,
+            self::DC->value,
             self::FL->value,
             self::GA->value,
             self::IL->value,
@@ -126,6 +129,7 @@ enum State: string
         return [
             self::AL->name => self::AL->value,
             self::CT->name => self::CT->value,
+            self::DC->name => self::DC->value,
             self::DE->name => self::DE->value,
             self::FL->name => self::FL->value,
             self::GA->name => self::GA->value,
@@ -157,12 +161,17 @@ enum State: string
     {
         return [
             self::AK->name,
+            self::AR->name,
             self::AZ->name,
             self::CA->name,
             self::CO->name,
             self::HI->name,
             self::ID->name,
+            self::IA->name,
             self::KS->name,
+            self::LA->name,
+            self::MN->name,
+            self::MO->name,
             self::MT->name,
             self::NE->name,
             self::NV->name,
@@ -182,12 +191,17 @@ enum State: string
     {
         return [
             self::AK->value,
+            self::AR->value,
             self::AZ->value,
             self::CA->value,
             self::CO->value,
             self::HI->value,
             self::ID->value,
+            self::IA->value,
             self::KS->value,
+            self::LA->value,
+            self::MN->value,
+            self::MO->value,
             self::MT->value,
             self::NE->value,
             self::NV->value,
@@ -207,12 +221,17 @@ enum State: string
     {
         return [
             self::AK->name => self::AK->value,
+            self::AR->name => self::AR->value,
             self::AZ->name => self::AZ->value,
             self::CA->name => self::CA->value,
             self::CO->name => self::CO->value,
             self::HI->name => self::HI->value,
             self::ID->name => self::ID->value,
+            self::IA->name => self::IA->value,
             self::KS->name => self::KS->value,
+            self::LA->name => self::LA->value,
+            self::MN->name => self::MN->value,
+            self::MO->name => self::MO->value,
             self::MT->name => self::MT->value,
             self::NE->name => self::NE->value,
             self::NV->name => self::NV->value,
